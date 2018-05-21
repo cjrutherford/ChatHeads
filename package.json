@@ -1,0 +1,14 @@
+{
+  "name": "chat-heads",
+  "version": "1.0.0",
+  "description": "Desktop application with chat head overlay for Facebook Messenger",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Brian Lee",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^2.0.1"
+  }
+}
