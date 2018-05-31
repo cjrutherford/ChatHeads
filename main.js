@@ -12,7 +12,7 @@ function createWindow(){
         //show: false,
         webPreferences: {
             nodeIntegration: false,
-            preload: path.join(__dirname, 'friends.js')
+            preload: path.join(__dirname, 'friends-list.js')
         }
     });
     mainWindow.loadURL('https://www.messenger.com/login');
