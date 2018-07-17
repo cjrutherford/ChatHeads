@@ -11,6 +11,13 @@ require('electron-context-menu')({
         label: 'Create Chat Head',
         click(){ 
             createChatHead();
+            /*
+            var selected = document.querySelector('.tooltipText').firstChild;
+            var clickableEl = document.querySelector('[data-tooltip-content="' + selected.textContent + '"]').parentElement;
+            clickableEl.click();
+            var friendPP = clickableEl.getElementsByTagName("img")[0];
+            ipc.send('create-chat-head', friendPP.src);
+            */
         }
     }],
     window: BrowserWindow.getFocusedWindow()
@@ -40,33 +47,40 @@ function createChatHead(){
     var selected = document.querySelector('.tooltipText').firstChild;
     var clickableEl = document.querySelector('[data-tooltip-content="' + selected.textContent + '"]').parentElement;
     clickableEl.click();
+    
     chatHead = new BrowserWindow(
-        {width: 300, 
-        height: 300,
-        frame: false,
-        show: false,
-        webPreferences: {
-            nodeIntegration: false,
-        }
+        {
+            width: 56,
+            height: 56,
+            frame: false,
+            transparent: true,
+            show: false,
+            alwaysOnTop: true,
+            minimizable: false,
+            webPreferences: {
+                nodeIntegration: false,
+                preload: path.join(__dirname, 'chat-head.js')
+            }
         })
     var friendPP = clickableEl.getElementsByTagName("img")[0];
     chatHead.loadURL(friendPP.src);
-    //chatHead.loadURL(path.join(__dirname, 'browser.html'))
     chatHead.on('closed', () => {
         chatHead = null;
     })
-    chatHead.webContents.on('dom-ready', () => {
+    
+    chatHead.webContents.on('dom-ready', () => { 
         chatHead.webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'chat-head.css'), 'utf8'));
-        chatHead.show();
+        chatHead.setSize(55,55); //Electron bug makes window undraggable until window is resized
+        chatHead.show(true);
+        ipc.send('test');
+        ipc.send('chatHeadLoaded', chatHead);
     })
+    
 }
 
 ipc.on('delete', () => {
     window.$ = window.jQuery = require('jquery');
     showList()
-})
-document.addEventListener('DOMContentLoaded', ()=>{
-
 })
 
 
