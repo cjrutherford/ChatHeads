@@ -1,13 +1,5 @@
-body {
-    -webkit-app-region: drag;
-}
 img {
   border-radius: 50%;
+  -webkit-user-drag: none;
+  user-select: none;
 }
-div
-      {
-          width: 50%;
-          height: auto;
-          padding-top: 50%;
-          
-      }

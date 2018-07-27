@@ -47,16 +47,18 @@ function createChatHead(){
     var selected = document.querySelector('.tooltipText').firstChild;
     var clickableEl = document.querySelector('[data-tooltip-content="' + selected.textContent + '"]').parentElement;
     clickableEl.click();
-    
     chatHead = new BrowserWindow(
         {
-            width: 56,
-            height: 56,
+            //width: 56,
+            //height: 56,
+            maxHeight:55,
+            maxWidth:55,
             frame: false,
-            transparent: true,
+            //transparent: true,
             show: false,
             alwaysOnTop: true,
             minimizable: false,
+            maximizable: false,
             webPreferences: {
                 nodeIntegration: false,
                 preload: path.join(__dirname, 'chat-head.js')
@@ -70,17 +72,10 @@ function createChatHead(){
     
     chatHead.webContents.on('dom-ready', () => { 
         chatHead.webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'chat-head.css'), 'utf8'));
-        chatHead.setSize(55,55); //Electron bug makes window undraggable until window is resized
+        chatHead.setSize(55,55)
         chatHead.show(true);
-        ipc.send('test');
-        ipc.send('chatHeadLoaded', chatHead);
+        ipc.send('hideMain');
+        chatHead.webContents.send('chatHeadLoaded')
     })
-    
+
 }
-
-ipc.on('delete', () => {
-    window.$ = window.jQuery = require('jquery');
-    showList()
-})
-
-
