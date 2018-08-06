@@ -2,15 +2,17 @@ const electron = require('electron');
 const path = require('path');
 const url = require('url');
 const fs = require('fs');
-const {app, BrowserWindow, ipcMain, remote} = electron;
-
+const {app, BrowserWindow, ipcMain, Tray} = electron;
+const iconPath = __dirname + '/assets/icons/win/messenger.png';
 let mainWindow;
+var tray = null;
 
 function createWindow(){
     mainWindow = new BrowserWindow({
         width: 1500,
         height: 1000,
-        //show: false,
+        title: 'Chat-Head',
+        icon: iconPath,
         webPreferences: {
             nodeIntegration: false,
             preload: path.join(__dirname, 'friends-list.js')
@@ -27,6 +29,17 @@ function createWindow(){
     })
     mainWindow.on('close', ()=>{
         app.quit()
+    })
+    mainWindow.on('page-title-updated', (e)=>{
+        e.preventDefault();
+    })
+    tray = new Tray(iconPath);
+    tray.on('click', ()=>{
+        mainWindow.show();
+        let myWindows = BrowserWindow.getAllWindows();
+        if(myWindows[1]!= null){
+            myWindows[1].webContents.send('openClose');
+        }
     })
 }
 
@@ -56,3 +69,5 @@ ipcMain.on('show', ()=>{
 ipcMain.on('hideMain', ()=>{
     mainWindow.hide()
 })
+
+app.disableHardwareAcceleration();

@@ -1,34 +1,45 @@
 const electron = require('electron');
 const {ipcRenderer: ipc} = electron;
+const {BrowserWindow} = require('electron').remote;
 let chatHead;
 let isChatDisplayed = false;
 
 ipc.on('chatHeadLoaded', () => {
-    chatHead = document.querySelector("img");
-    //chatHead.setAttribute('sytle', '-webkit-app-region: drag')
-    console.log(window.length)
     //manual dragging
+    //chatHead = document.querySelector("img");
+    chatHead = document.body;
+    chatHead.setAttribute('style', '-webkit-app-region: drag;'); //This was the only workaround that 
+    chatHead.setAttribute('style', '-webkit-app-region: no-drag;'); //I found to make window transparent
     var wX = 0;
     var wY = 0;
     var dragging = false;
     var posChanged = false;
+    var ctxMenuOpen = false;
+    chatHead.addEventListener('contextmenu', ()=>{
+        ctxMenuOpen = true;
+    })
     chatHead.addEventListener('mousedown', function(e){
-        dragging = true;
-        wX = e.pageX;
-        wY = e.pageY;
+        if(ctxMenuOpen){
+            dragging = false;
+        }
+        else if(e.button == 0){
+            dragging = true;
+        }
+        wX = e.clientX;
+        wY = e.clientY;
     })
     window.addEventListener('mousemove', function(e){
-        if(dragging){
-            if(e.screenX-wX != e.screenX || e.screenX-wX != e.screenX){
-                posChanged = true;
-            }
+        if(dragging && (e.screenX-wX != e.screenX || e.screenY-wY != e.screenY)){
+            posChanged = true;
             this.moveTo(e.screenX-wX, e.screenY-wY);
-            console.log(this.window.length)
         }
     })
     window.addEventListener('mouseup', function(e){
         dragging = false;
-        if(!posChanged && e.button == 0){
+        if(ctxMenuOpen){
+            ctxMenuOpen = false;
+        }
+        else if(!posChanged && e.button == 0){
             if(isChatDisplayed){
                 ipc.send('hideMain');
                 isChatDisplayed = false;
@@ -40,4 +51,9 @@ ipc.on('chatHeadLoaded', () => {
         }
         posChanged = false;
     })
+})
+
+ipc.on('openClose', ()=>{
+    isChatDisplayed = true;
+    dragging = false;
 })
