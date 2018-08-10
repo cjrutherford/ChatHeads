@@ -6,10 +6,10 @@ let isChatDisplayed = false;
 
 ipc.on('chatHeadLoaded', () => {
     //manual dragging
-    //chatHead = document.querySelector("img");
-    chatHead = document.body;
-    chatHead.setAttribute('style', '-webkit-app-region: drag;'); //This was the only workaround that 
-    chatHead.setAttribute('style', '-webkit-app-region: no-drag;'); //I found to make window transparent
+    chatHead = document.querySelector('img');
+    //chatHead = document.body;
+    document.body.setAttribute('style', '-webkit-app-region: drag;'); //This was the only workaround that 
+    document.body.setAttribute('style', '-webkit-app-region: no-drag;'); //I found to make window transparent
     var wX = 0;
     var wY = 0;
     var dragging = false;
@@ -31,7 +31,14 @@ ipc.on('chatHeadLoaded', () => {
     window.addEventListener('mousemove', function(e){
         if(dragging && (e.screenX-wX != e.screenX || e.screenY-wY != e.screenY)){
             posChanged = true;
-            this.moveTo(e.screenX-wX, e.screenY-wY);
+            //this.moveTo(e.screenX-wX, e.screenY-wY);
+            require('electron').remote.getCurrentWindow().setBounds({
+                x: e.screenX-wX,
+                y:  e.screenY-wY,
+                width: 55,
+                height: 55
+            })
+            ipc.send('chatheadMoved')
         }
     })
     window.addEventListener('mouseup', function(e){

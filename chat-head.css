@@ -3,3 +3,6 @@ img {
   -webkit-user-drag: none;
   user-select: none;
 }
+body{
+  margin: 0px;
+}

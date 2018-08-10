@@ -30,8 +30,9 @@ function createWindow(){
     mainWindow.on('close', ()=>{
         app.quit()
     })
-    mainWindow.on('page-title-updated', (e)=>{
+    mainWindow.on('page-title-updated', (e, title)=>{
         e.preventDefault();
+        mainWindow.webContents.send('showUnreadDot', title);
     })
     tray = new Tray(iconPath);
     tray.on('click', ()=>{
@@ -70,4 +71,7 @@ ipcMain.on('hideMain', ()=>{
     mainWindow.hide()
 })
 
+ipcMain.on('chatheadMoved',()=>{
+    mainWindow.webContents.send('moveDot')
+})
 app.disableHardwareAcceleration();
