@@ -5,7 +5,8 @@ const {BrowserWindow, Menu, MenuItem} = require('electron').remote;
 const path = require('path');
 const fs = require('fs')
 let chatHead = null;
-var unreadDot = null;
+let unreadDot = null;
+let msgPreview = null;
 
 require('electron-context-menu')({
 	prepend: (params, browserWindow) => [{
@@ -59,21 +60,38 @@ function createChatHead(){
         alwaysOnTop: true,
         resizable: false,
         transparent: true,
+        setIgnoreMouseEvents: true,
         x: chatHead.getBounds().x-7,
         y: chatHead.getBounds().y-7,
         show:false
     })
-    unreadDot.setIgnoreMouseEvents(true);
-    unreadDot.on('closed',()=>{
-        unreadDot = null;
+    msgPreview = new BrowserWindow({
+        width: 220,
+        height: 90,
+        frame:false,
+        parent: chatHead,
+        alwaysOnTop: true,
+        resizable: false,
+        transparent: true,
+        setIgnoreMouseEvents: true,
+        x: chatHead.getBounds().x-205,
+        y: chatHead.getBounds().y-5,
+        show:true
     })
-    var friendPP = clickableEl.getElementsByTagName("img")[0];
-    chatHead.loadURL(friendPP.src);
-    unreadDot.loadFile('new_message_dot.html');
-    
     chatHead.on('closed', () => {
         chatHead = null;
     })
+    unreadDot.on('closed',()=>{
+        unreadDot = null;
+    })
+    msgPreview.on('closed',()=>{
+        msgPreview = null;
+    })
+    var friendPP = clickableEl.getElementsByTagName("img")[0];
+    chatHead.loadURL(friendPP.src);
+    unreadDot.loadFile('unreadDot.html');
+    msgPreview.loadFile('msgPreview.html');
+   
     const ctxMenu = new Menu();
     ctxMenu.append(new MenuItem({
         label: 'Close Chat Head',
@@ -100,14 +118,22 @@ function createChatHead(){
             width: 40,
             height: 40
         })
+        msgPreview.setBounds({
+            x: chatHead.getBounds().x-205,
+            y: chatHead.getBounds().y-5,
+            width: 220,
+            height: 90
+        })
     })
 
     ipc.on('showUnreadDot', (e, title)=>{
         if(title === 'Messenger'){
             unreadDot.hide();
+            //msgPreview.hide();
         }
         else{
             unreadDot.show()
+            //msgPreview.show()
         }
     })
 }
