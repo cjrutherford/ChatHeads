@@ -3,7 +3,9 @@ const {ipcRenderer: ipc} = electron;
 const {BrowserWindow} = require('electron').remote;
 let chatHead;
 let isChatDisplayed = false;
-
+const webFrame  = require('electron').webFrame;
+webFrame.setVisualZoomLevelLimits(1,1);
+webFrame.setLayoutZoomLevelLimits(0, 0);
 ipc.on('chatHeadLoaded', () => {
     //manual dragging
     chatHead = document.querySelector('img');

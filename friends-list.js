@@ -7,6 +7,8 @@ const fs = require('fs')
 let chatHead = null;
 let unreadDot = null;
 let msgPreview = null;
+let temp = "()"
+var timer;
 
 require('electron-context-menu')({
 	prepend: (params, browserWindow) => [{
@@ -31,10 +33,6 @@ function createChatHead(){
     }
     chatHead = new BrowserWindow(
         {
-            //width: 56,
-            //height: 56,
-            //maxHeight:55,
-            //maxWidth:55,
             width:50,
             height:50,
             frame: false,
@@ -44,7 +42,6 @@ function createChatHead(){
             focusable: false,
             minimizable: false,
             maximizable: false,
-            show: false,
             x: electron.screen.getPrimaryDisplay().bounds.width - 150,
             y: 100,
             webPreferences: {
@@ -76,7 +73,11 @@ function createChatHead(){
         setIgnoreMouseEvents: true,
         x: chatHead.getBounds().x-205,
         y: chatHead.getBounds().y-5,
-        show:true
+        show:false,
+        webPreferences: {
+            nodeIntegration: false,
+            preload: path.join(__dirname, 'messagePreview.js')
+        }
     })
     chatHead.on('closed', () => {
         chatHead = null;
@@ -91,7 +92,7 @@ function createChatHead(){
     chatHead.loadURL(friendPP.src);
     unreadDot.loadFile('unreadDot.html');
     msgPreview.loadFile('msgPreview.html');
-   
+
     const ctxMenu = new Menu();
     ctxMenu.append(new MenuItem({
         label: 'Close Chat Head',
@@ -105,12 +106,12 @@ function createChatHead(){
     chatHead.webContents.on('dom-ready', () => { 
         chatHead.webContents.insertCSS(fs.readFileSync(path.join(__dirname, 'chat-head.css'), 'utf8'));
         chatHead.setSize(55,55)
-        chatHead.setResizable(false)
+        chatHead.setResizable(false);
         chatHead.show(true);
         ipc.send('hideMain');
         chatHead.webContents.send('chatHeadLoaded')
-    })
 
+    })
     ipc.on('moveDot', ()=>{
         unreadDot.setBounds({
             x: chatHead.getBounds().x-7,
@@ -126,14 +127,32 @@ function createChatHead(){
         })
     })
 
-    ipc.on('showUnreadDot', (e, title)=>{
-        if(title === 'Messenger'){
-            unreadDot.hide();
-            //msgPreview.hide();
+    ipc.on('newMsg', (e, title)=>{
+        unreadDot.show()
+        if(title.contains('(') && !title.contains(temp)) {
+            listenForMsg();
         }
-        else{
-            unreadDot.show()
-            //msgPreview.show()
-        }
+        if(title.contains('('))
+            temp = title.substr(0,3);
     })
+
+    ipc.on('noNewMsgs', ()=>{
+        unreadDot.hide();
+        msgPreview.hide();
+    })
+    function listenForMsg(){
+        let newMsg = document.querySelectorAll('._1ht3 span._1htf span');
+        for(let i = 0; i < newMsg.length; i++){
+            newMsg[i].addEventListener('DOMSubtreeModified', ()=>{
+                getNewMsg(newMsg[i])
+            });
+        }
+        getNewMsg(newMsg[0])
+    }
+    function getNewMsg(person){
+        ipc.send('updatePreview', person.textContent)
+        msgPreview.show()
+        clearTimeout(timer)
+        timer = setTimeout(msgPreview.hide, 3000);
+    }
 }

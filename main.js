@@ -6,6 +6,7 @@ const {app, BrowserWindow, ipcMain, Tray} = electron;
 const iconPath = __dirname + '/assets/icons/win/messenger.png';
 let mainWindow;
 var tray = null;
+let msgPreview;
 
 function createWindow(){
     mainWindow = new BrowserWindow({
@@ -21,7 +22,6 @@ function createWindow(){
     mainWindow.loadURL('https://www.messenger.com/login');
     //mainWindow.loadFile(__dirname + '/browser.html');
 
-    //console.log(document.bgColor)
     mainWindow.webContents.openDevTools();
     //did-finish-load
     mainWindow.webContents.on('did-finish-load', () => {
@@ -30,9 +30,17 @@ function createWindow(){
     mainWindow.on('close', ()=>{
         app.quit()
     })
-    mainWindow.on('page-title-updated', (e, title)=>{
-        e.preventDefault();
-        mainWindow.webContents.send('showUnreadDot', title);
+    mainWindow.on('page-title-updated', (e, title)=> {
+        //e.preventDefault();
+        //var newMsgFrom = $("._1ht3");
+
+        if (title === 'Messenger') {
+            mainWindow.webContents.send('noNewMsgs');
+        }
+        else if(title.includes('messaged you') || title.includes('(')){
+            console.log(title);
+            mainWindow.webContents.send('newMsg', title);
+        }
     })
     tray = new Tray(iconPath);
     tray.on('click', ()=>{
@@ -64,8 +72,8 @@ app.on('activate', function(){
 
 ipcMain.on('show', ()=>{
     mainWindow.show();
-})
 
+})
 
 ipcMain.on('hideMain', ()=>{
     mainWindow.hide()
@@ -73,5 +81,13 @@ ipcMain.on('hideMain', ()=>{
 
 ipcMain.on('chatheadMoved',()=>{
     mainWindow.webContents.send('moveDot')
+})
+
+ipcMain.on('previewID', (e,id)=>{
+    msgPreview = BrowserWindow.fromId(id);
+})
+
+ipcMain.on('updatePreview',(e,msg)=>{
+    msgPreview.webContents.send('changeMsg', msg)
 })
 app.disableHardwareAcceleration();
