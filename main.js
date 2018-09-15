@@ -38,7 +38,7 @@ function createWindow(){
             mainWindow.webContents.send('noNewMsgs');
         }
         else if(title.includes('messaged you') || title.includes('(')){
-            console.log(title);
+            //console.log(title);
             mainWindow.webContents.send('newMsg', title);
         }
     })
