@@ -13,15 +13,27 @@ Chat head always stays on top of your windows (except when in full screen applic
 ![Index](https://github.com/brnlee/ChatHeads/blob/master/assets/screenshots/Index.PNG?raw=true "Chat")
 
 ![ChatHead](https://github.com/brnlee/ChatHeads/blob/master/assets/screenshots/MessagePreview.PNG?raw=true "Chat head with message preview")
+
+## Usage
+
+Right click on the profile picture of the person you want to make a chat head of and click "Create Chathead" in the context menu
+
+Close chat head overlay by right click and clicking "close"
+
+Left click chat head overlay to open and close the Messenger app to send or read messages
+
+The Messenger application is minimized to the task tray when closed via the chat head overlay and can be opened again by clicking the task tray icon
 ### Prerequisites
 
-What things you need to install the software and how to install them
+This application requires the installation of the following packages
 
 ```
 npm install electron --save-dev --save-exact
 npm install electron-context-menu
 ```
+## Notice
 
+This application does not store any information including account credentials and messages. This application uses Messenger.com to get your chat.
 ## Built With
 
 * [Electron](https://electronjs.org/) - JavaScript framework used to build desktop applications
